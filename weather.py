@@ -865,7 +865,7 @@ with conf1:
 
     confidence = data["confidence"]
 
-   if confidence >= 80:
+    if confidence >= 80:
         risk = "LOW"
         emoji = "🟢"
     elif confidence >= 60:
@@ -1175,7 +1175,8 @@ def weather_ai_response(question, weather_data, location):
         return (
             f"🌧️ Today's rain probability for **{location}** "
             f"is approximately **{today['rain']}%**. "
-            f"The current condition is **{CONDITIONS[current_weather['condition']][1]}**."
+            f"The current condition is "
+            f"**{CONDITIONS[current_weather['condition']][1]}**."
         )
 
     if (
@@ -1264,7 +1265,9 @@ def weather_ai_response(question, weather_data, location):
     )
 
 
-# Display previous messages
+# ============================================================
+# DISPLAY PREVIOUS MESSAGES
+# ============================================================
 
 for message in st.session_state.messages:
 
@@ -1276,7 +1279,9 @@ for message in st.session_state.messages:
         st.markdown(message["text"])
 
 
-# Chat input
+# ============================================================
+# CHAT INPUT
+# ============================================================
 
 prompt = st.chat_input(
     "Ask WeatherAI something..."
