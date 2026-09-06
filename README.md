@@ -43,6 +43,23 @@ A Machine Learning web application that predicts a weather  based on their tempp
 
 
 
+
+
+## 📁 Project Structure
+weather-reportpredictor/
+```text
+│
+├── weather.py
+├── requirements.txt
+├── README.md
+```
+
+
+
+
+---
+
+
 ## 👩‍💻 Author
 👩🏻 Rupam Baurai
 
