@@ -877,4 +877,469 @@ with conf1:
 
     st.metric(
         "Model Confidence",
-        f"{c
+        f"{confidence}%",
+        f"{emoji} {risk}"
+    )
+
+with conf2:
+
+    confidence_df = pd.DataFrame(
+        data["confidence_trend"]
+    )
+
+    fig3 = go.Figure()
+
+    fig3.add_trace(
+        go.Scatter(
+            x=confidence_df["run"],
+            y=confidence_df["confidence"],
+            mode="lines+markers",
+            name="Confidence",
+            line=dict(width=3)
+        )
+    )
+
+    fig3.update_layout(
+        height=300,
+        margin=dict(l=10, r=10, t=20, b=10),
+        yaxis_title="Confidence (%)",
+        yaxis=dict(range=[40, 100]),
+        template=(
+            "plotly_dark"
+            if st.session_state.dark
+            else "plotly_white"
+        )
+    )
+
+    st.plotly_chart(
+        fig3,
+        use_container_width=True
+    )
+
+
+# ============================================================
+# FORECAST BUST DETECTION
+# ============================================================
+
+st.markdown("---")
+st.markdown("## 🚨 Forecast Bust Detection")
+
+bust = data["bust"]
+
+b1, b2, b3, b4 = st.columns(4)
+
+with b1:
+    st.metric(
+        "Previous Temperature",
+        f'{bust["previous_temp"]}°C'
+    )
+
+with b2:
+    st.metric(
+        "Latest Temperature",
+        f'{bust["latest_temp"]}°C'
+    )
+
+with b3:
+
+    change_text = (
+        f'+{bust["change"]}°C'
+        if bust["change"] >= 0
+        else f'{bust["change"]}°C'
+    )
+
+    st.metric(
+        "Temperature Change",
+        change_text
+    )
+
+with b4:
+
+    risk = bust["risk"]
+
+    if risk == "Low":
+        risk_icon = "🟢"
+    elif risk == "Moderate":
+        risk_icon = "🟡"
+    else:
+        risk_icon = "🔴"
+
+    st.metric(
+        "Bust Risk",
+        f"{risk_icon} {risk}"
+    )
+
+if bust["risk"] == "High":
+
+    st.error(
+        "🔴 High forecast-bust risk: "
+        "the latest model conditions differ noticeably "
+        "from the previous forecast."
+    )
+
+elif bust["risk"] == "Moderate":
+
+    st.warning(
+        "🟡 Moderate forecast-bust risk: "
+        "some disagreement exists between forecast runs."
+    )
+
+else:
+
+    st.success(
+        "🟢 Low forecast-bust risk: "
+        "the latest forecast remains relatively consistent."
+    )
+
+
+# ============================================================
+# ALERTS
+# ============================================================
+
+st.markdown("---")
+st.markdown("## ⚠️ Weather Alerts")
+
+for alert in data["alerts"]:
+
+    if alert["type"] == "Official":
+
+        st.warning(
+            f'**{alert["title"]}**\n\n'
+            f'{alert["body"]}'
+        )
+
+    else:
+
+        st.info(
+            f'**{alert["title"]}**\n\n'
+            f'{alert["body"]}'
+        )
+
+
+# ============================================================
+# AI INSIGHTS
+# ============================================================
+
+st.markdown("---")
+st.markdown("## 🧠 AI Weather Insights")
+
+insight1, insight2, insight3 = st.columns(3)
+
+with insight1:
+
+    st.markdown("### 🌡️ Temperature")
+
+    temp_change = data["daily"][0]["high"] - current["temp"]
+
+    if temp_change > 0:
+        st.write(
+            f"Today's maximum temperature is expected "
+            f"to be around **{data['daily'][0]['high']}°C**, "
+            f"about **{temp_change}°C** above the current temperature."
+        )
+    else:
+        st.write(
+            f"Today's maximum temperature is expected "
+            f"to remain around **{data['daily'][0]['high']}°C**."
+        )
+
+
+with insight2:
+
+    st.markdown("### 🌧️ Rain")
+
+    rain_probability = data["daily"][0]["rain"]
+
+    if rain_probability >= 60:
+
+        st.write(
+            f"Rain probability is relatively high at "
+            f"**{rain_probability}%**. Carry an umbrella "
+            f"and monitor the latest forecast."
+        )
+
+    elif rain_probability >= 35:
+
+        st.write(
+            f"There is a **{rain_probability}%** chance of rain. "
+            f"Conditions may change during the day."
+        )
+
+    else:
+
+        st.write(
+            f"Rain probability is relatively low at "
+            f"**{rain_probability}%**."
+        )
+
+
+with insight3:
+
+    st.markdown("### 🤖 Forecast Reliability")
+
+    st.write(
+        f"The current model confidence is "
+        f"**{data['confidence']}%** with "
+        f"**{data['bust']['risk']}** forecast-bust risk."
+    )
+
+
+# ============================================================
+# WEATHER SUMMARY
+# ============================================================
+
+st.markdown("---")
+st.markdown("## 📋 Weather Summary")
+
+summary_col1, summary_col2 = st.columns(2)
+
+with summary_col1:
+
+    st.markdown(
+        f"""
+        **Location:** {country["name"]}, {country["country"]}
+
+        **Current:** {current["temp"]}°C — {weather_label}
+
+        **Feels Like:** {current["feels_like"]}°C
+
+        **Humidity:** {current["humidity"]}%
+
+        **Wind:** {current["wind"]} km/h
+        """
+    )
+
+with summary_col2:
+
+    today_forecast = data["daily"][0]
+
+    st.markdown(
+        f"""
+        **Today's High:** {today_forecast["high"]}°C
+
+        **Today's Low:** {today_forecast["low"]}°C
+
+        **Rain Probability:** {today_forecast["rain"]}%
+
+        **Forecast Confidence:** {data["confidence"]}%
+
+        **Bust Risk:** {data["bust"]["risk"]}
+        """
+    )
+
+
+# ============================================================
+# WEATHER AI ASSISTANT
+# ============================================================
+
+st.markdown("---")
+st.markdown("## 💬 WeatherAI Assistant")
+
+st.caption(
+    "Ask about today's weather, rain, temperature, wind, "
+    "confidence or forecast-bust risk."
+)
+
+
+def weather_ai_response(question, weather_data, location):
+
+    q = question.lower()
+
+    current_weather = weather_data["current"]
+    today = weather_data["daily"][0]
+    confidence = weather_data["confidence"]
+    bust = weather_data["bust"]
+
+    if (
+        "temperature" in q
+        or "temp" in q
+        or "hot" in q
+        or "cold" in q
+    ):
+
+        return (
+            f"🌡️ The current temperature in "
+            f"**{location}** is **{current_weather['temp']}°C** "
+            f"and it feels like **{current_weather['feels_like']}°C**. "
+            f"Today's expected high is **{today['high']}°C** "
+            f"and low is **{today['low']}°C**."
+        )
+
+    if (
+        "rain" in q
+        or "raining" in q
+        or "umbrella" in q
+        or "precipitation" in q
+    ):
+
+        return (
+            f"🌧️ Today's rain probability for **{location}** "
+            f"is approximately **{today['rain']}%**. "
+            f"The current condition is **{CONDITIONS[current_weather['condition']][1]}**."
+        )
+
+    if (
+        "wind" in q
+        or "windy" in q
+    ):
+
+        return (
+            f"💨 The current wind speed is approximately "
+            f"**{current_weather['wind']} km/h**. "
+            f"Today's forecast wind speed is around "
+            f"**{today['wind']} km/h**."
+        )
+
+    if (
+        "humidity" in q
+        or "moisture" in q
+    ):
+
+        return (
+            f"💧 Current humidity in **{location}** is "
+            f"**{current_weather['humidity']}%**."
+        )
+
+    if (
+        "confidence" in q
+        or "reliable" in q
+        or "accuracy" in q
+    ):
+
+        return (
+            f"🤖 The current forecast confidence is "
+            f"**{confidence}%**. "
+            f"The estimated forecast-bust risk is "
+            f"**{bust['risk']}**."
+        )
+
+    if (
+        "bust" in q
+        or "forecast error" in q
+        or "forecast risk" in q
+    ):
+
+        return (
+            f"🚨 The current forecast-bust risk is "
+            f"**{bust['risk']}**. "
+            f"The temperature difference between the "
+            f"previous and latest forecast is "
+            f"**{bust['change']}°C**."
+        )
+
+    if (
+        "weather" in q
+        or "condition" in q
+        or "today" in q
+    ):
+
+        return (
+            f"🌦️ In **{location}**, the current weather is "
+            f"**{CONDITIONS[current_weather['condition']][1]}** "
+            f"with a temperature of **{current_weather['temp']}°C**. "
+            f"Today's high is **{today['high']}°C**, "
+            f"with a **{today['rain']}%** rain probability."
+        )
+
+    if (
+        "hello" in q
+        or "hi" in q
+        or "hey" in q
+    ):
+
+        return (
+            "👋 Hello! I'm WeatherAI. "
+            "Ask me about temperature, rain, wind, "
+            "humidity, forecast confidence or bust risk."
+        )
+
+    return (
+        f"🤖 I can help you understand the forecast for "
+        f"**{location}**. Try asking:\n\n"
+        f"- What is the temperature?\n"
+        f"- Will it rain today?\n"
+        f"- What is the wind speed?\n"
+        f"- What is the forecast confidence?\n"
+        f"- What is the forecast-bust risk?"
+    )
+
+
+# Display previous messages
+
+for message in st.session_state.messages:
+
+    with st.chat_message(
+        message["role"],
+        avatar="🤖" if message["role"] == "assistant" else "👤"
+    ):
+
+        st.markdown(message["text"])
+
+
+# Chat input
+
+prompt = st.chat_input(
+    "Ask WeatherAI something..."
+)
+
+if prompt:
+
+    # User message
+    st.session_state.messages.append(
+        {
+            "role": "user",
+            "text": prompt
+        }
+    )
+
+    with st.chat_message(
+        "user",
+        avatar="👤"
+    ):
+
+        st.markdown(prompt)
+
+    # AI response
+    response = weather_ai_response(
+        prompt,
+        data,
+        country["name"]
+    )
+
+    st.session_state.messages.append(
+        {
+            "role": "assistant",
+            "text": response
+        }
+    )
+
+    with st.chat_message(
+        "assistant",
+        avatar="🤖"
+    ):
+
+        st.markdown(response)
+
+
+# ============================================================
+# FOOTER
+# ============================================================
+
+st.markdown("---")
+
+st.markdown(
+    """
+    <div style="
+        text-align:center;
+        opacity:0.65;
+        padding:20px;
+    ">
+        🌦️ <b>WeatherAI</b><br>
+        AI-powered weather intelligence dashboard<br>
+        <small>
+        Forecast data in this demo is simulated for demonstration purposes.
+        </small>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
