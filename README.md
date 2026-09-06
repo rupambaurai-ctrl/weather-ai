@@ -66,7 +66,7 @@ weather-reportpredictor/
  
 *Streamlit
  
-*Scikit-learn
+
  
  
 *Pandas
@@ -75,7 +75,7 @@ weather-reportpredictor/
 *NumPy
  
 
-*Joblib
+*Plotly
  
  
 
