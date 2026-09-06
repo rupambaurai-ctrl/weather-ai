@@ -44,6 +44,31 @@ https://weather-ai-7bjqhbwg2mhizh4jcbjgqs.streamlit.app/
 
 
 
+## ✨ Features
+*Predicts overall well-being as:
+ 
+  *🌨 Rainy
+ 
+  *🌥 Sunny
+  
+  *🌡 At Risk humid 
+
+  *🌤 Mostly sunny
+  
+  *🌩 Thunderstrom
+
+  *⛈ Light rain 
+
+  *🟥High risk 
+  
+
+
+
+
+  ---
+
+
+
 
 
 
