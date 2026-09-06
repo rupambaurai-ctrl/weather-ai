@@ -60,6 +60,28 @@ weather-reportpredictor/
 ---
 
 
+
+## 🛠️ Tech Stack
+*Python
+ 
+*Streamlit
+ 
+*Scikit-learn
+ 
+ 
+*Pandas
+ 
+ 
+*NumPy
+ 
+
+*Joblib
+ 
+ 
+
+---
+
+
 ## 👩‍💻 Author
 👩🏻 Rupam Baurai
 
